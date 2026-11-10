@@ -1,0 +1,282 @@
+@import "tailwindcss";
+@import "./styles/fonts.css";
+
+@theme {
+  --color-ink: #0a192f;
+  --color-ink-800: #0d2039;
+  --color-ink-700: #14304f;
+  --color-royal: #1e3a8a;
+  --color-royal-600: #1b3479;
+  --color-royal-500: #2c52ad;
+  --color-royal-300: #93aee8;
+  --color-royal-100: #dbe5f9;
+  --color-mist: #f4f7fd;
+  --color-cloud: #fafcff;
+  --color-line: #e3eaf7;
+  --color-muted: #586787;
+  --color-gold: #c2a468;
+
+  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-display: "Cormorant Garamond", "Times New Roman", Georgia, serif;
+  --font-bn: "Hind Siliguri", "Noto Sans Bengali", ui-sans-serif, sans-serif;
+  --font-bn-display: "Noto Serif Bengali", "Hind Siliguri", serif;
+
+  --shadow-soft: 0 30px 70px -46px rgba(10, 25, 47, 0.42);
+  --shadow-lift: 0 45px 90px -45px rgba(10, 25, 47, 0.5);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: #ffffff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    color: inherit;
+  }
+
+  section[id] {
+    scroll-margin-top: 5.5rem;
+  }
+
+  ::selection {
+    background: var(--color-royal);
+    color: #ffffff;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input[type="date"] {
+    color-scheme: light;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-royal);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .shell {
+    @apply mx-auto w-full max-w-[1180px] px-5 sm:px-8;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-3 text-[0.64rem] font-semibold uppercase tracking-[0.3em] text-royal;
+  }
+
+  .eyebrow::before {
+    content: "";
+    display: block;
+    height: 1px;
+    width: 2rem;
+    background: currentColor;
+    opacity: 0.45;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-[0.82rem] font-semibold tracking-[0.005em] transition-all duration-300;
+  }
+
+  .btn svg {
+    @apply h-[1.05rem] w-[1.05rem] shrink-0;
+  }
+
+  .btn-primary {
+    @apply bg-ink text-white;
+    box-shadow: 0 20px 40px -24px rgba(10, 25, 47, 0.95);
+  }
+
+  .btn-primary:hover {
+    @apply bg-royal;
+    transform: translateY(-1px);
+    box-shadow: 0 26px 46px -22px rgba(30, 58, 138, 0.65);
+  }
+
+  .btn-outline {
+    @apply border border-royal/25 bg-white text-royal hover:border-royal/60 hover:bg-mist;
+  }
+
+  .btn-dark {
+    @apply border border-white/25 text-white hover:border-white/60 hover:bg-white/10;
+  }
+
+  .btn-light {
+    @apply bg-white text-ink hover:bg-royal-100;
+  }
+
+  .label {
+    @apply mb-2 block text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-[0.9rem] text-ink transition-all duration-200 placeholder:text-muted/50 focus:border-royal/50 focus:outline-none focus:ring-4 focus:ring-royal/10;
+  }
+
+  .field-invalid {
+    @apply border-red-300 focus:border-red-400 focus:ring-red-100;
+  }
+
+  .card-line {
+    @apply rounded-[26px] border border-line bg-white;
+  }
+
+  .display-hero {
+    line-height: 0.97;
+    letter-spacing: -0.022em;
+  }
+
+  .display-section {
+    line-height: 1.04;
+    letter-spacing: -0.018em;
+  }
+}
+
+/* Bangla typography — unlayered so it wins over utility font declarations. */
+.lang-bn {
+  font-family: var(--font-bn);
+}
+
+.lang-bn h1,
+.lang-bn h2,
+.lang-bn h3,
+.lang-bn h4,
+.lang-bn .font-display {
+  font-family: var(--font-bn-display);
+}
+
+.lang-bn .eyebrow {
+  letter-spacing: 0.1em;
+}
+
+.lang-bn .display-hero {
+  line-height: 1.34;
+  letter-spacing: -0.004em;
+}
+
+.lang-bn .display-section {
+  line-height: 1.42;
+  letter-spacing: 0;
+}
+
+.lang-bn .hero-title {
+  font-size: clamp(2.35rem, 5.1vw, 3.95rem);
+}
+
+/* Bengali does not benefit from the wide Latin-style letter spacing. */
+.lang-bn [class*="tracking-["] {
+  letter-spacing: 0.07em;
+}
+
+.lang-bn .tracking-\[0\.3em\] {
+  letter-spacing: 0.08em;
+}
+
+.bg-grid {
+  background-image: linear-gradient(
+      to right,
+      rgba(30, 58, 138, 0.055) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(30, 58, 138, 0.055) 1px, transparent 1px);
+  background-size: 76px 76px;
+}
+
+.bg-grid-dark {
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 88px 88px;
+}
+
+.bg-map {
+  background-image: linear-gradient(
+      90deg,
+      rgba(30, 58, 138, 0.09) 1px,
+      transparent 1px
+    ),
+    linear-gradient(rgba(30, 58, 138, 0.09) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+.map-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.35;
+  animation: map-pulse 2.4s cubic-bezier(0.25, 0.8, 0.4, 1) infinite;
+}
+
+@keyframes map-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.float-soft {
+  animation: float-soft 7s ease-in-out infinite;
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .map-pulse::after {
+    animation: none;
+  }
+
+  .float-soft {
+    animation: none;
+  }
+}
