@@ -8,6 +8,7 @@ import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { Services } from "./components/Services";
 import { Testimonials } from "./components/Testimonials";
+import { ScrollToTop } from "./ScrollToTop"; // ১. স্ক্রল বাটন ইমপোর্ট করা হলো
 import { LangProvider, useLang } from "./i18n";
 
 function Site() {
@@ -24,7 +25,7 @@ function Site() {
 
       <Header />
 
-      <main>
+      <main id="home">
         <Hero />
         <About />
         <Chambers />
@@ -36,6 +37,7 @@ function Site() {
 
       <Footer />
       <FloatingActions />
+      <ScrollToTop /> {/* ২. এখানে স্ক্রল বাটনটি বসিয়ে দেওয়া হলো */}
     </div>
   );
 }
