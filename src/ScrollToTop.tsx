@@ -12,7 +12,8 @@ export const ScrollToTop: React.FC = () => {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-6 right-6 z-[9999] bg-teal-600 hover:bg-teal-700 text-white p-3 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none cursor-pointer"
+      // এখানে bottom-6 এর বদলে bottom-20 বা প্রয়োজনমতো বাড়িয়ে দেওয়া হয়েছে যাতে ফ্লোটিং অ্যাকশন বাটনের উপরে থাকে
+      className="fixed bottom-20 right-6 z-[9999] bg-teal-600 hover:bg-teal-700 text-white p-3 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none cursor-pointer"
       title="Scroll to top"
     >
       <svg
