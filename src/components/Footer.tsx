@@ -154,18 +154,40 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Developer Credit & Copyright Section */}
         <div className="border-t border-white/10 py-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[0.65rem] text-white/30">
               © {year} {t.brand.name} {t.brand.alias}. {t.footer.rights}
             </p>
             <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-              <span className="text-[0.6rem] text-white/25">
-                {t.footer.credit}
-              </span>
               <LangSwitch tone="dark" />
             </div>
           </div>
+
+          {/* UpToTechSyl Developer Credit & Professional Info */}
+          <div className="mt-4 pt-4 border-t border-white/5 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-[0.7rem] text-white/60">
+            <div>
+              Developed by <span className="font-semibold text-royal-300">Farhana Khatun</span> | Executive Officer (HR) & Full-Stack MERN Developer at <span className="font-semibold text-royal-300">UpToTechSyl</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-4 text-[0.68rem]">
+              <a 
+                href="mailto:farhanakhatun22@gmail.com" 
+                className="hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                <Mail className="h-3 w-3 text-royal-300" /> farhanakhatun22@gmail.com
+              </a>
+              <a 
+                href="https://wa.me/8801759945057" 
+                target="_blank" 
+                rel="noreferrer"
+                className="hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                <MessageCircle className="h-3 w-3 text-royal-300" /> WhatsApp: 01759945057
+              </a>
+            </div>
+          </div>
+
           <p className="mt-3 max-w-3xl text-[0.6rem] leading-relaxed text-white/25">
             {t.footer.disclaimer}
           </p>
