@@ -8,9 +8,9 @@ import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { Services } from "./components/Services";
 import { Testimonials } from "./components/Testimonials";
-import { ScrollToTop } from "./ScrollToTop"; // ১. স্ক্রল বাটন ইমপোর্ট করা হলো
+import { TelehealthBanner } from "./components/TelehealthBanner"; // 
+import { ScrollToTop } from "./ScrollToTop"; 
 import { LangProvider, useLang } from "./i18n";
-
 function Site() {
   const { t, lang } = useLang();
 
@@ -22,11 +22,10 @@ function Site() {
       >
         {t.common.skipToContent}
       </a>
-
       <Header />
-
       <main id="home">
         <Hero />
+        <TelehealthBanner /> 
         <About />
         <Chambers />
         <Services />
@@ -37,7 +36,7 @@ function Site() {
 
       <Footer />
       <FloatingActions />
-      <ScrollToTop /> {/* ২. এখানে স্ক্রল বাটনটি বসিয়ে দেওয়া হলো */}
+      <ScrollToTop /> 
     </div>
   );
 }
