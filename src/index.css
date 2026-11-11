@@ -16,8 +16,7 @@
   --color-muted: #586787;
   --color-gold: #c2a468;
 
-  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-    sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Cormorant Garamond", "Times New Roman", Georgia, serif;
   --font-bn: "Hind Siliguri", "Noto Sans Bengali", ui-sans-serif, sans-serif;
   --font-bn-display: "Noto Serif Bengali", "Hind Siliguri", serif;
