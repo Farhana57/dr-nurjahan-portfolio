@@ -71,11 +71,11 @@ export function useLang() {
 }
 
 export const CONTACT = {
-  phoneDisplay: "+880 1712-345678",
-  phoneHref: "tel:+8801712345678",
+  phoneDisplay: "+8801601-878867",
+  phoneHref: "tel:+8801601-878867",
   email: "appointments@drnurjahan.com",
   emailHref: "mailto:appointments@drnurjahan.com",
-  whatsapp: "https://wa.me/8801712345678",
+  whatsapp: "https://wa.me/8801601-878867",
 } as const;
 
 export function mapHref(query: string) {
