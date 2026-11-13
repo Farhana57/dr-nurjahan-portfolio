@@ -43,8 +43,8 @@ export function Booking() {
   // Receipt View State
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
 
-  // Fixed Advance Amount
-  const ADVANCE_AMOUNT = 1000;
+  // Fixed Advance Amount for Normal Delivery Project
+  const PROJECT_ADVANCE_AMOUNT = 2000;
 
   // Form State
   const [formData, setFormData] = useState({
@@ -56,7 +56,7 @@ export function Booking() {
     chamber: "ইবনে সিনা হাসপাতাল (দড়াটানা)",
     preferredDate: "",
     problem: "",
-    paymentMethod: "bkash", // ডিফল্ট বিকাশ রাখা হলো যাতে ১০০০ টাকা অ্যাডভান্স ও রিসিপ্ট সুবিধা পাওয়া যায়
+    paymentMethod: "bkash", // 'bkash' বা 'cash' (শুধুমাত্র প্রজেক্টের জন্য ব্যবহৃত হবে)
     trxId: "",
   });
 
@@ -84,6 +84,9 @@ export function Booking() {
     const receiptNo = `${activeTab === "project" ? "NDP" : "APT"}-${randomNum}`;
     const today = new Date().toLocaleDateString("en-GB");
 
+    const isProjectBkash =
+      activeTab === "project" && formData.paymentMethod === "bkash";
+
     const generatedReceipt: ReceiptData = {
       receiptNo,
       date: today,
@@ -95,9 +98,9 @@ export function Booking() {
       mobile: formData.mobile,
       chamber: formData.chamber,
       preferredDate: formData.preferredDate,
-      paymentMethod: formData.paymentMethod,
+      paymentMethod: activeTab === "general" ? "none" : formData.paymentMethod,
       trxId: formData.trxId.toUpperCase(),
-      advancePaid: formData.paymentMethod === "bkash" ? ADVANCE_AMOUNT : 0,
+      advancePaid: isProjectBkash ? PROJECT_ADVANCE_AMOUNT : 0,
     };
 
     // Set Receipt to display on screen
@@ -105,36 +108,41 @@ export function Booking() {
 
     // Prepare WhatsApp Message
     let message = "";
-    const paymentInfoBn =
-      formData.paymentMethod === "bkash"
-        ? `💳 *পেমেন্ট মাধ্যম:* বিকাশ (bKash Personal)%0A💰 *অ্যাডভান্স পরিশোধিত:* ১,০০০ টাকা (ফিক্সড)%0A🧾 *Transaction ID:* ${formData.trxId.toUpperCase()}%0A🔖 *Receipt No:* ${receiptNo}`
-        : `💳 *পেমেন্ট মাধ্যম:* চেম্বারে সরাসরি ক্যাশ (১,০০০ টাকা অ্যাডভান্স প্রযোজ্য)%0A🔖 *Booking ID:* ${receiptNo}`;
-
-    const paymentInfoEn =
-      formData.paymentMethod === "bkash"
-        ? `💳 *Payment Method:* bKash Personal%0A💰 *Advance Paid:* 1,000 BDT (Fixed)%0A🧾 *Transaction ID:* ${formData.trxId.toUpperCase()}%0A🔖 *Receipt No:* ${receiptNo}`
-        : `💳 *Payment Method:* Pay Cash at Chamber (1,000 BDT Advance applicable)%0A🔖 *Booking ID:* ${receiptNo}`;
 
     if (activeTab === "general") {
+      // সাধারণ চেম্বার সিরিয়াল (কোনো অ্যাডভান্স নেই)
       message =
         lang === "bn"
           ? `*সাধারণ চেম্বার সিরিয়াল অনুরোধ*%0A%0A` +
+            `🔖 *Serial / Receipt No:* ${receiptNo}%0A` +
             `👤 *রোগীর নাম:* ${formData.patientName}%0A` +
             `🎂 *বয়স:* ${formData.age}%0A` +
             `📱 *মোবাইল নম্বর:* ${formData.mobile}%0A` +
             `📍 *ঠিকানা:* ${formData.address || "দেওয়া হয়নি"}%0A` +
             `🏥 *চেম্বার:* ${formData.chamber}%0A` +
             `📅 *পছন্দের তারিখ:* ${formData.preferredDate}%0A` +
-            `${paymentInfoBn}`
+            `💳 *ফি:* চেম্বারে সরাসরি পরিশোধযোগ্য (অ্যাডভান্স প্রযোজ্য নয়)`
           : `*General Chamber Appointment Request*%0A%0A` +
+            `🔖 *Serial / Receipt No:* ${receiptNo}%0A` +
             `👤 *Patient Name:* ${formData.patientName}%0A` +
             `🎂 *Age:* ${formData.age}%0A` +
             `📱 *Mobile:* ${formData.mobile}%0A` +
             `📍 *Address:* ${formData.address || "N/A"}%0A` +
             `🏥 *Chamber:* ${formData.chamber}%0A` +
             `📅 *Preferred Date:* ${formData.preferredDate}%0A` +
-            `${paymentInfoEn}`;
+            `💳 *Fee:* Payable at Chamber (No Advance Required)`;
     } else {
+      // নরমাল ডেলিভারি প্রজেক্ট (২,০০০ টাকা ফিক্সড অ্যাডভান্স)
+      const paymentInfoBn =
+        formData.paymentMethod === "bkash"
+          ? `💳 *পেমেন্ট মাধ্যম:* বিকাশ (bKash Personal)%0A💰 *অ্যাডভান্স পরিশোধিত:* ২,০০০ টাকা (ফিক্সড)%0A🧾 *Transaction ID:* ${formData.trxId.toUpperCase()}%0A🔖 *Receipt No:* ${receiptNo}`
+          : `💳 *পেমেন্ট মাধ্যম:* চেম্বারে সরাসরি ক্যাশ (২,০০০ টাকা অ্যাডভান্স প্রযোজ্য)%0A🔖 *Booking ID:* ${receiptNo}`;
+
+      const paymentInfoEn =
+        formData.paymentMethod === "bkash"
+          ? `💳 *Payment Method:* bKash Personal%0A💰 *Advance Paid:* 2,000 BDT (Fixed)%0A🧾 *Transaction ID:* ${formData.trxId.toUpperCase()}%0A🔖 *Receipt No:* ${receiptNo}`
+          : `💳 *Payment Method:* Pay Cash at Chamber (2,000 BDT Advance applicable)%0A🔖 *Booking ID:* ${receiptNo}`;
+
       message =
         lang === "bn"
           ? `*Normal Delivery Project - রেজিস্ট্রেশন অনুরোধ*%0A%0A` +
@@ -216,8 +224,8 @@ export function Booking() {
                 <div className="text-center sm:text-left">
                   <span className="inline-block bg-white/20 text-white text-[0.7rem] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-2">
                     {receipt.type === "project"
-                      ? "Normal Delivery Project — Registration Card"
-                      : "Chamber Appointment — Advance Receipt"}
+                      ? "Normal Delivery Project — Advance Receipt"
+                      : "Chamber Appointment — Serial Receipt"}
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-display font-bold">
                     {lang === "bn"
@@ -233,7 +241,7 @@ export function Booking() {
 
                 <div className="bg-white/15 backdrop-blur-sm px-4 py-3 rounded-2xl text-center sm:text-right border border-white/20">
                   <p className="text-[0.65rem] uppercase tracking-wider text-white/80">
-                    Receipt / ID No
+                    {receipt.type === "project" ? "Receipt / ID No" : "Serial / ID No"}
                   </p>
                   <p className="text-lg font-mono font-bold text-amber-300">
                     {receipt.receiptNo}
@@ -245,33 +253,39 @@ export function Booking() {
               </div>
 
               <div className="p-6 sm:p-8 space-y-6">
+                {/* Status Banner */}
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
                     <div>
                       <p className="text-sm font-bold text-emerald-900">
-                        {receipt.paymentMethod === "bkash"
+                        {receipt.type === "general"
                           ? lang === "bn"
-                            ? "অ্যাডভান্স পেমেন্ট কনফার্মড (১,০০০ টাকা ফিক্সড)"
-                            : "Advance Payment Confirmed (1,000 BDT Fixed)"
+                            ? "চেম্বার সিরিয়াল কনফার্মেশন স্লিপ"
+                            : "Chamber Appointment Confirmation Slip"
+                          : receipt.paymentMethod === "bkash"
+                          ? lang === "bn"
+                            ? "অ্যাডভান্স পেমেন্ট কনফার্মড (২,০০০ টাকা ফিক্সড)"
+                            : "Advance Payment Confirmed (2,000 BDT Fixed)"
                           : lang === "bn"
-                          ? "বুকিং কনফার্মেশন স্লিপ"
-                          : "Booking Confirmation Slip"}
+                          ? "নরমাল ডেলিভারি প্রজেক্ট বুকিং স্লিপ"
+                          : "Normal Delivery Project Booking Slip"}
                       </p>
                       <p className="text-xs text-emerald-700">
                         {lang === "bn"
-                          ? "চেম্বারে আসার সময় এই রিসিপ্টটি সাথে নিয়ে আসবেন।"
-                          : "Please bring this receipt to the chamber."}
+                          ? "চেম্বারে আসার সময় এই রিসিপ্টটি প্রিন্ট করে বা মোবাইলে সাথে নিয়ে আসবেন।"
+                          : "Please bring a printed or digital copy of this receipt to the chamber."}
                       </p>
                     </div>
                   </div>
-                  {receipt.paymentMethod === "bkash" && (
-                    <span className="px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold uppercase">
-                      PAID ৳1,000
+                  {receipt.type === "project" && receipt.paymentMethod === "bkash" && (
+                    <span className="px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold uppercase shrink-0">
+                      PAID ৳2,000
                     </span>
                   )}
                 </div>
 
+                {/* Patient Details Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm border-y border-line py-5">
                   <div>
                     <span className="text-xs text-muted block">
@@ -342,53 +356,78 @@ export function Booking() {
                   )}
                 </div>
 
+                {/* Payment / Fee Summary Box */}
                 <div className="bg-slate-50 p-5 rounded-2xl border border-line space-y-2.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted">
-                      {lang === "bn" ? "পেমেন্ট মাধ্যম:" : "Payment Method:"}
-                    </span>
-                    <span className="font-bold text-ink">
-                      {receipt.paymentMethod === "bkash"
-                        ? "bKash Personal (01759945057)"
-                        : lang === "bn"
-                        ? "চেম্বারে ক্যাশ প্রদান"
-                        : "Cash at Chamber"}
-                    </span>
-                  </div>
-
-                  {receipt.paymentMethod === "bkash" && (
+                  {receipt.type === "general" ? (
                     <>
                       <div className="flex justify-between">
                         <span className="text-muted">
-                          {lang === "bn"
-                            ? "বিকাশ Transaction ID (TrxID):"
-                            : "bKash Transaction ID (TrxID):"}
-                        </span>
-                        <span className="font-mono font-bold text-pink-700">
-                          {receipt.trxId}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-base pt-2 border-t border-line">
-                        <span className="font-bold text-ink">
-                          {lang === "bn"
-                            ? "অগ্রিম পরিশোধিত (Fixed Advance):"
-                            : "Fixed Advance Paid:"}
+                          {lang === "bn" ? "অ্যাডভান্স পেমেন্ট:" : "Advance Payment:"}
                         </span>
                         <span className="font-bold text-emerald-700">
-                          ১,০০০ টাকা (1,000 BDT)
+                          {lang === "bn"
+                            ? "প্রযোজ্য নয় (০ টাকা)"
+                            : "Not Required (0 BDT)"}
                         </span>
                       </div>
+                      <p className="text-xs text-muted pt-1">
+                        *{" "}
+                        {lang === "bn"
+                          ? "নোট: সাধারণ চেম্বার সিরিয়ালের জন্য কোনো অগ্রিম পেমেন্টের প্রয়োজন নেই। ভিজিট ফি সরাসরি চেম্বারে পরিশোধ করবেন।"
+                          : "Note: No advance payment is required for a general chamber appointment. Consultation fee is payable directly at the chamber."}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-muted">
+                          {lang === "bn" ? "পেমেন্ট মাধ্যম:" : "Payment Method:"}
+                        </span>
+                        <span className="font-bold text-ink">
+                          {receipt.paymentMethod === "bkash"
+                            ? "bKash Personal (01759945057)"
+                            : lang === "bn"
+                            ? "চেম্বারে ক্যাশ প্রদান"
+                            : "Cash at Chamber"}
+                        </span>
+                      </div>
+
+                      {receipt.paymentMethod === "bkash" && (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-muted">
+                              {lang === "bn"
+                                ? "বিকাশ Transaction ID (TrxID):"
+                                : "bKash Transaction ID (TrxID):"}
+                            </span>
+                            <span className="font-mono font-bold text-pink-700">
+                              {receipt.trxId}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-base pt-2 border-t border-line">
+                            <span className="font-bold text-ink">
+                              {lang === "bn"
+                                ? "অগ্রিম পরিশোধিত (Fixed Advance):"
+                                : "Fixed Advance Paid:"}
+                            </span>
+                            <span className="font-bold text-emerald-700">
+                              ২,০০০ টাকা (2,000 BDT)
+                            </span>
+                          </div>
+                        </>
+                      )}
+
+                      <p className="text-xs text-muted pt-2">
+                        *{" "}
+                        {lang === "bn"
+                          ? "নোট: পরিশোধিত ২,০০০ টাকা অগ্রিম ফি মূল ডেলিভারি খরচ থেকে কর্তনযোগ্য। অবশিষ্ট টাকা চেম্বারে/হাসপাতালে পরিশোধ করতে হবে।"
+                          : "Note: The 2,000 BDT fixed advance payment is deductible from the total delivery cost. Remaining balance is payable at the chamber/hospital."}
+                      </p>
                     </>
                   )}
-
-                  <p className="text-xs text-muted pt-2">
-                    *{" "}
-                    {lang === "bn"
-                      ? "নোট: পরিশোধিত ১,০০০ টাকা অগ্রিম ফি মূল বিল বা ডেলিভারি খরচ থেকে কর্তনযোগ্য। অবশিষ্ট টাকা চেম্বারে পরিশোধ করতে হবে।"
-                      : "Note: The 1,000 BDT fixed advance payment is deductible from the total service/delivery fee. Remaining balance is payable at the chamber."}
-                  </p>
                 </div>
 
+                {/* Footer Signature & Contact */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 text-xs text-muted">
                   <div>
                     <p className="font-semibold text-ink">
@@ -460,8 +499,8 @@ export function Booking() {
                       ? "স্পেশাল প্রজেক্ট কার্ড"
                       : "Special Project Card"
                     : lang === "bn"
-                    ? "ডাক্তার সিরিয়াল ফর্ম"
-                    : "Doctor Appointment Form"}
+                    ? "ডাক্তার সিরিয়াল ফর্ম (অ্যাডভান্স ছাড়াই)"
+                    : "Doctor Appointment Form (No Advance)"}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-display font-bold">
                   {activeTab === "project"
@@ -587,165 +626,180 @@ export function Booking() {
                   </div>
                 </div>
 
-                {/* If General Appointment Mode -> Preferred Chamber & Date */}
+                {/* If General Appointment Mode -> Preferred Chamber & Date (NO ADVANCE) */}
                 {activeTab === "general" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="block text-xs font-semibold uppercase text-ink/70">
-                        {lang === "bn"
-                          ? "চেম্বার নির্বাচন করুন *"
-                          : "Select Chamber *"}
-                      </label>
-                      <select
-                        name="chamber"
-                        value={formData.chamber}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border border-line rounded-xl text-sm focus:outline-none focus:border-royal bg-white"
-                      >
-                        <option value="ইবনে সিনা হাসপাতাল (দড়াটানা)">
-                          ইবনে সিনা হাসপাতাল (দড়াটানা, যশোর)
-                        </option>
-                        <option value="দড়াটানা হাসপাতাল এন্ড ডায়াগনস্টিক">
-                          দড়াটানা হাসপাতাল এন্ড ডায়াগনস্টিক
-                        </option>
-                        <option value="ঝরনা ক্লিনিক (পাইকপট্টি)">
-                          ঝরনা ক্লিনিক (গুরুদাস বাবু লেন, পাইকপট্টি)
-                        </option>
-                        <option value="অনলাইন ভিডিও কনসালটেশন">
-                          অনলাইন ভিডিও কনসালটেশন (Telehealth)
-                        </option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-xs font-semibold uppercase text-ink/70">
-                        {lang === "bn"
-                          ? "পছন্দের তারিখ *"
-                          : "Preferred Date *"}
-                      </label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
-                        <input
-                          type="date"
-                          name="preferredDate"
-                          required
-                          value={formData.preferredDate}
-                          onChange={handleChange}
-                          className="w-full pl-10 pr-4 py-3 border border-line rounded-xl text-sm focus:outline-none focus:border-royal"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Payment Method Option */}
-                <div className="space-y-2">
-                  <label className="block text-xs font-semibold uppercase text-ink/70">
-                    {lang === "bn"
-                      ? "পেমেন্ট মাধ্যম নির্বাচন করুন *"
-                      : "Select Payment Method *"}
-                  </label>
-                  <div className="relative">
-                    <CreditCard className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
-                    <select
-                      name="paymentMethod"
-                      value={formData.paymentMethod}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-line rounded-xl text-sm focus:outline-none focus:border-royal bg-white"
-                    >
-                      <option value="bkash">
-                        {lang === "bn"
-                          ? "বিকাশ পেমেন্ট (bKash Personal - ১,০০০ টাকা ফিক্সড অ্যাডভান্স)"
-                          : "bKash Payment (1,000 BDT Fixed Advance)"}
-                      </option>
-                      <option value="cash">
-                        {lang === "bn"
-                          ? "চেম্বারে সরাসরি ক্যাশ প্রদান (১,০০০ টাকা অগ্রিম প্রযোজ্য)"
-                          : "Pay Cash at Chamber (1,000 BDT Advance applicable)"}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* bKash Instruction & TrxID Field when 'bkash' is selected */}
-                {formData.paymentMethod === "bkash" && (
-                  <div className="p-5 bg-pink-50/80 border border-pink-200 rounded-2xl space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-pink-700">
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="block text-xs font-semibold uppercase text-ink/70">
                           {lang === "bn"
-                            ? "বিকাশ পার্সোনাল নম্বর (Send Money)"
-                            : "bKash Personal Number (Send Money)"}
-                        </p>
-                        <div className="flex items-center gap-3 mt-1">
-                          <p className="text-lg font-bold text-ink">
-                            01759945057
-                          </p>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-pink-600 text-white">
-                            {lang === "bn"
-                              ? "অ্যাডভান্স: ১,০০০ টাকা"
-                              : "Advance: 1,000 BDT"}
-                          </span>
+                            ? "চেম্বার নির্বাচন করুন *"
+                            : "Select Chamber *"}
+                        </label>
+                        <select
+                          name="chamber"
+                          value={formData.chamber}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-line rounded-xl text-sm focus:outline-none focus:border-royal bg-white"
+                        >
+                          <option value="ইবনে সিনা হাসপাতাল (দড়াটানা)">
+                            ইবনে সিনা হাসপাতাল (দড়াটানা, যশোর)
+                          </option>
+                          <option value="দড়াটানা হাসপাতাল এন্ড ডায়াগনস্টিক">
+                            দড়াটানা হাসপাতাল এন্ড ডায়াগনস্টিক
+                          </option>
+                          <option value="ঝরনা ক্লিনিক (পাইকপট্টি)">
+                            ঝরনা ক্লিনিক (গুরুদাস বাবু লেন, পাইকপট্টি)
+                          </option>
+                          <option value="অনলাইন ভিডিও কনসালটেশন">
+                            অনলাইন ভিডিও কনসালটেশন (Telehealth)
+                          </option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-xs font-semibold uppercase text-ink/70">
+                          {lang === "bn"
+                            ? "পছন্দের তারিখ *"
+                            : "Preferred Date *"}
+                        </label>
+                        <div className="relative">
+                          <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+                          <input
+                            type="date"
+                            name="preferredDate"
+                            required
+                            value={formData.preferredDate}
+                            onChange={handleChange}
+                            className="w-full pl-10 pr-4 py-3 border border-line rounded-xl text-sm focus:outline-none focus:border-royal"
+                          />
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleCopyNumber}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-pink-600 text-white text-xs font-semibold hover:bg-pink-700 transition self-start sm:self-auto"
-                      >
-                        {copied ? (
-                          <Check className="h-3.5 w-3.5" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                        {copied
-                          ? lang === "bn"
-                            ? "কপি হয়েছে"
-                            : "Copied"
-                          : lang === "bn"
-                          ? "নম্বর কপি করুন"
-                          : "Copy Number"}
-                      </button>
                     </div>
 
-                    <p className="text-xs text-ink/75 leading-relaxed">
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 leading-relaxed">
+                      ✅{" "}
                       {lang === "bn"
-                        ? 'উপরের বিকাশ পার্সোনাল নম্বরে ফিক্সড ১,০০০ টাকা "Send Money" করার পর নিচের ঘরে আপনার বিকাশ Transaction ID (TrxID) লিখে ফর্মটি জমা দিন। জমা দেওয়ার সাথে সাথেই আপনি চেম্বারে আসার জন্য ডাউনলোডযোগ্য রিসিপ্ট পেয়ে যাবেন।'
-                        : 'Send Money 1,000 BDT to the bKash number above, enter the Transaction ID (TrxID) below, and submit to instantly receive your downloadable receipt for the chamber.'}
-                    </p>
-
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-semibold uppercase text-pink-900">
-                        {lang === "bn"
-                          ? "বিকাশ Transaction ID (TrxID) *"
-                          : "bKash Transaction ID (TrxID) *"}
-                      </label>
-                      <div className="relative">
-                        <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-pink-600" />
-                        <input
-                          type="text"
-                          name="trxId"
-                          required={formData.paymentMethod === "bkash"}
-                          placeholder={
-                            lang === "bn" ? "যেমন: BGH78K9L2P" : "e.g., BGH78K9L2P"
-                          }
-                          value={formData.trxId}
-                          onChange={handleChange}
-                          className="w-full pl-10 pr-4 py-2.5 border border-pink-300 bg-white rounded-xl text-sm focus:outline-none focus:border-pink-600 uppercase"
-                        />
-                      </div>
+                        ? "সাধারণ চেম্বার সিরিয়ালের জন্য কোনো অ্যাডভান্স পেমেন্ট লাগবে না। সাবমিট করার পর আপনার সিরিয়াল রিসিপ্টটি ডাউনলোড করে চেম্বারে নিয়ে আসবেন।"
+                        : "No advance payment is required for general chamber appointments. After submitting, download your serial receipt and bring it to the chamber."}
                     </div>
-                  </div>
+                  </>
                 )}
 
-                {/* Project Specific Note */}
+                {/* If Project Mode -> 2,000 BDT Fixed Advance Payment Options */}
                 {activeTab === "project" && (
-                  <div className="p-4 bg-royal/[0.05] border border-royal/15 rounded-xl text-xs text-muted leading-relaxed">
-                    💡{" "}
-                    {lang === "bn"
-                      ? "রেজিস্ট্রেশন ফি: ডেলিভারির খরচ থেকে কর্তন যোগ্য ১,০০০ টাকা অগ্রিম ফি প্রযোজ্য। বাকি টাকা চেম্বারে পরিশোধ করতে হবে।"
-                      : "Registration Fee: Fixed 1,000 BDT advance fee applicable, deductible from delivery cost. Remaining balance payable at chamber."}
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-semibold uppercase text-ink/70">
+                        {lang === "bn"
+                          ? "পেমেন্ট মাধ্যম নির্বাচন করুন (২,০০০ টাকা ফিক্সড অ্যাডভান্স) *"
+                          : "Select Payment Method (2,000 BDT Fixed Advance) *"}
+                      </label>
+                      <div className="relative">
+                        <CreditCard className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
+                        <select
+                          name="paymentMethod"
+                          value={formData.paymentMethod}
+                          onChange={handleChange}
+                          className="w-full pl-10 pr-4 py-3 border border-line rounded-xl text-sm focus:outline-none focus:border-royal bg-white"
+                        >
+                          <option value="bkash">
+                            {lang === "bn"
+                              ? "বিকাশ পেমেন্ট (bKash Personal - ২,০০০ টাকা ফিক্সড অ্যাডভান্স)"
+                              : "bKash Payment (2,000 BDT Fixed Advance)"}
+                          </option>
+                          <option value="cash">
+                            {lang === "bn"
+                              ? "চেম্বারে সরাসরি ক্যাশ প্রদান (২,০০০ টাকা অগ্রিম প্রযোজ্য)"
+                              : "Pay Cash at Chamber (2,000 BDT Advance applicable)"}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* bKash Instruction & TrxID Field when 'bkash' is selected */}
+                    {formData.paymentMethod === "bkash" && (
+                      <div className="p-5 bg-pink-50/80 border border-pink-200 rounded-2xl space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-wider text-pink-700">
+                              {lang === "bn"
+                                ? "বিকাশ পার্সোনাল নম্বর (Send Money)"
+                                : "bKash Personal Number (Send Money)"}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <p className="text-lg font-bold text-ink">
+                                01759945057
+                              </p>
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-pink-600 text-white">
+                                {lang === "bn"
+                                  ? "অ্যাডভান্স: ২,০০০ টাকা"
+                                  : "Advance: 2,000 BDT"}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleCopyNumber}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-pink-600 text-white text-xs font-semibold hover:bg-pink-700 transition self-start sm:self-auto"
+                          >
+                            {copied ? (
+                              <Check className="h-3.5 w-3.5" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                            {copied
+                              ? lang === "bn"
+                                ? "কপি হয়েছে"
+                                : "Copied"
+                              : lang === "bn"
+                              ? "নম্বর কপি করুন"
+                              : "Copy Number"}
+                          </button>
+                        </div>
+
+                        <p className="text-xs text-ink/75 leading-relaxed">
+                          {lang === "bn"
+                            ? 'উপরের বিকাশ পার্সোনাল নম্বরে ফিক্সড ২,০০০ টাকা "Send Money" করার পর নিচের ঘরে আপনার বিকাশ Transaction ID (TrxID) লিখে ফর্মটি জমা দিন। জমা দেওয়ার সাথে সাথেই আপনি চেম্বারে আসার জন্য ডাউনলোডযোগ্য অ্যাডভান্স রিসিপ্ট পেয়ে যাবেন।'
+                            : 'Send Money 2,000 BDT to the bKash number above, enter the Transaction ID (TrxID) below, and submit to instantly receive your downloadable advance receipt for the chamber.'}
+                        </p>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-semibold uppercase text-pink-900">
+                            {lang === "bn"
+                              ? "বিকাশ Transaction ID (TrxID) *"
+                              : "bKash Transaction ID (TrxID) *"}
+                          </label>
+                          <div className="relative">
+                            <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-pink-600" />
+                            <input
+                              type="text"
+                              name="trxId"
+                              required={
+                                activeTab === "project" &&
+                                formData.paymentMethod === "bkash"
+                              }
+                              placeholder={
+                                lang === "bn"
+                                  ? "যেমন: BGH78K9L2P"
+                                  : "e.g., BGH78K9L2P"
+                              }
+                              value={formData.trxId}
+                              onChange={handleChange}
+                              className="w-full pl-10 pr-4 py-2.5 border border-pink-300 bg-white rounded-xl text-sm focus:outline-none focus:border-pink-600 uppercase"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="p-4 bg-royal/[0.05] border border-royal/15 rounded-xl text-xs text-muted leading-relaxed">
+                      💡{" "}
+                      {lang === "bn"
+                        ? "রেজিস্ট্রেশন ফি: ডেলিভারির খরচ থেকে কর্তন যোগ্য ২,০০০ টাকা অগ্রিম ফি প্রযোজ্য। বাকি টাকা চেম্বারে পরিশোধ করতে হবে।"
+                        : "Registration Fee: Fixed 2,000 BDT advance fee applicable, deductible from delivery cost. Remaining balance payable at chamber."}
+                    </div>
+                  </>
                 )}
 
                 {/* Submit Button */}
@@ -754,17 +808,17 @@ export function Booking() {
                   className="w-full btn btn-primary py-3.5 justify-center text-base shadow-lg hover:shadow-xl transition-all"
                 >
                   <Send className="h-5 w-5 mr-2" />
-                  {formData.paymentMethod === "bkash"
+                  {activeTab === "general"
                     ? lang === "bn"
-                      ? "১,০০০ টাকা বিকাশ তথ্যসহ কনফার্ম করুন ও রিসিপ্ট নিন"
-                      : "Confirm 1,000 BDT bKash Payment & Get Receipt"
-                    : activeTab === "general"
+                      ? "সিরিয়াল কনফার্ম করুন ও রিসিপ্ট নিন"
+                      : "Confirm Serial & Get Receipt"
+                    : formData.paymentMethod === "bkash"
                     ? lang === "bn"
-                      ? "সিরিয়াল পাঠান (WhatsApp)"
-                      : "Book Appointment via WhatsApp"
+                      ? "২,০০০ টাকা বিকাশ তথ্যসহ কনফার্ম করুন ও রিসিপ্ট নিন"
+                      : "Confirm 2,000 BDT bKash Payment & Get Receipt"
                     : lang === "bn"
-                    ? "রেজিস্ট্রেশন জমা দিন (WhatsApp)"
-                    : "Submit Registration via WhatsApp"}
+                    ? "রেজিস্ট্রেশন জমা দিন ও স্লিপ নিন"
+                    : "Submit Registration & Get Slip"}
                 </button>
               </form>
             </div>
