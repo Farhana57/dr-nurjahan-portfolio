@@ -56,7 +56,7 @@ export function Booking() {
     chamber: "ইবনে সিনা হাসপাতাল (দড়াটানা)",
     preferredDate: "",
     problem: "",
-    paymentMethod: "bkash", // 'bkash' বা 'cash' (শুধুমাত্র প্রজেক্টের জন্য ব্যবহৃত হবে)
+    paymentMethod: "bkash",
     trxId: "",
   });
 
@@ -121,7 +121,7 @@ export function Booking() {
             `📍 *ঠিকানা:* ${formData.address || "দেওয়া হয়নি"}%0A` +
             `🏥 *চেম্বার:* ${formData.chamber}%0A` +
             `📅 *পছন্দের তারিখ:* ${formData.preferredDate}%0A` +
-            `💳 *ফি:* চেম্বারে সরাসরি পরিশোধযোগ্য (অ্যাডভান্স প্রযোজ্য নয়)`
+            `💳 *ফি:* চেম্বারে সরাসরি পরিশোধযোগ্য (অ্যাডভান্স প্রযোজ্য নয়)`
           : `*General Chamber Appointment Request*%0A%0A` +
             `🔖 *Serial / Receipt No:* ${receiptNo}%0A` +
             `👤 *Patient Name:* ${formData.patientName}%0A` +
@@ -366,7 +366,7 @@ export function Booking() {
                         </span>
                         <span className="font-bold text-emerald-700">
                           {lang === "bn"
-                            ? "প্রযোজ্য নয় (০ টাকা)"
+                            ? "প্রযোজ্য নয় (০ টাকা)"
                             : "Not Required (0 BDT)"}
                         </span>
                       </div>
@@ -433,7 +433,7 @@ export function Booking() {
                     <p className="font-semibold text-ink">
                       {lang === "bn" ? "যোগাযোগ ও সিরিয়াল:" : "Chamber Contact:"}
                     </p>
-                    <p>01926-576245, 01601-874467, 01759-945057</p>
+                    <p>01926-576245, 01601-874467</p>
                   </div>
                   <div className="text-center sm:text-right">
                     <div className="w-36 border-b border-dashed border-ink/40 mb-1 mx-auto sm:ml-auto"></div>
@@ -499,7 +499,7 @@ export function Booking() {
                       ? "স্পেশাল প্রজেক্ট কার্ড"
                       : "Special Project Card"
                     : lang === "bn"
-                    ? "ডাক্তার সিরিয়াল ফর্ম (অ্যাডভান্স ছাড়াই)"
+                    ? "ডাক্তার সিরিয়াল ফর্ম (অ্যাডভান্স ছাড়াই)"
                     : "Doctor Appointment Form (No Advance)"}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-display font-bold">
@@ -648,9 +648,6 @@ export function Booking() {
                           <option value="দড়াটানা হাসপাতাল এন্ড ডায়াগনস্টিক">
                             দড়াটানা হাসপাতাল এন্ড ডায়াগনস্টিক
                           </option>
-                          <option value="ঝরনা ক্লিনিক (পাইকপট্টি)">
-                            ঝরনা ক্লিনিক (গুরুদাস বাবু লেন, পাইকপট্টি)
-                          </option>
                           <option value="অনলাইন ভিডিও কনসালটেশন">
                             অনলাইন ভিডিও কনসালটেশন (Telehealth)
                           </option>
@@ -760,7 +757,7 @@ export function Booking() {
 
                         <p className="text-xs text-ink/75 leading-relaxed">
                           {lang === "bn"
-                            ? 'উপরের বিকাশ পার্সোনাল নম্বরে ফিক্সড ২,০০০ টাকা "Send Money" করার পর নিচের ঘরে আপনার বিকাশ Transaction ID (TrxID) লিখে ফর্মটি জমা দিন। জমা দেওয়ার সাথে সাথেই আপনি চেম্বারে আসার জন্য ডাউনলোডযোগ্য অ্যাডভান্স রিসিপ্ট পেয়ে যাবেন।'
+                            ? 'উপরের বিকাশ পার্সোনাল নম্বরে ফিক্সড ২,০০০ টাকা "Send Money" করার পর নিচের ঘরে আপনার বিকাশ Transaction ID (TrxID) লিখে ফর্মটি জমা দিন। জমা দেওয়ার সাথে সাথেই আপনি চেম্বারে আসার জন্য ডাউনলোডযোগ্য অ্যাডভান্স রিসিপ্ট পেয়ে যাবেন।'
                             : 'Send Money 2,000 BDT to the bKash number above, enter the Transaction ID (TrxID) below, and submit to instantly receive your downloadable advance receipt for the chamber.'}
                         </p>
 

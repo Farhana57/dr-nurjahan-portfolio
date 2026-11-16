@@ -89,19 +89,25 @@ function BrandLink({
   );
 }
 
-export function Header() {
+interface HeaderProps {
+  currentView?: "home" | "success";
+  onNavigate?: (view: "home" | "success", sectionId?: string) => void;
+}
+
+export function Header({ currentView = "home", onNavigate }: HeaderProps) {
   const { t } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  const links = [
-    { id: "home", label: t.nav.home },
-    { id: "about", label: t.nav.about },
-    { id: "chambers", label: t.nav.chambers },
-    { id: "services", label: t.nav.services },
-    { id: "stories", label: t.nav.stories },
-    { id: "faq", label: t.nav.faq },
+  // মেনু আইটেমগুলোতে action বা section id যুক্ত করা হলো
+  const navItems = [
+    { id: "home", label: t.nav.home, type: "section", target: "home" },
+    { id: "about", label: t.nav.about, type: "section", target: "about" },
+    { id: "chambers", label: t.nav.chambers, type: "section", target: "chambers" },
+    { id: "services", label: t.nav.services, type: "section", target: "services" },
+    { id: "stories", label: t.nav.stories, type: "page", target: "success" },
+    { id: "faq", label: t.nav.faq, type: "section", target: "faq" },
   ];
 
   useEffect(() => {
@@ -127,6 +133,24 @@ export function Header() {
     };
   }, [open]);
 
+  const handleItemClick = (item: typeof navItems[0]) => {
+    setOpen(false);
+    if (item.type === "page") {
+      onNavigate?.("success");
+    } else {
+      if (currentView !== "home") {
+        onNavigate?.("home");
+        setTimeout(() => {
+          const el = document.getElementById(item.target);
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        }, 150);
+      } else {
+        const el = document.getElementById(item.target);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
   return (
     <>
       <div className="bg-[#070B19] text-white/85">
@@ -150,7 +174,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* ডাইনামিক ফ্লোটিং হেডার যা ভিডিওর মতো স্ক্রোল করলে ছোট ও ফ্লোটিং হবে */}
+      {/* ডাইনামিক ফ্লোটিং হেডার */}
       <header className="fixed inset-x-0 top-9 z-50 flex justify-center px-4 pt-3 transition-all duration-500">
         <div
           className={`transition-all duration-500 ease-in-out flex items-center justify-between border border-white/10 bg-[#070B19]/95 backdrop-blur-md shadow-2xl ${
@@ -159,29 +183,43 @@ export function Header() {
               : "w-full max-w-7xl rounded-2xl px-6 py-3.5 text-white"
           }`}
         >
-          <BrandLink />
+          <BrandLink onClick={() => onNavigate?.("home")} />
 
           <nav
             aria-label="Primary"
             className="hidden items-center gap-6 lg:flex text-sm font-medium text-white/80"
           >
-            {links.map((link) => (
-              <a
-                key={link.id}
-                href={`#${link.id}`}
-                className="transition-colors hover:text-white py-1"
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleItemClick(item)}
+                className={`transition-colors hover:text-white py-1 cursor-pointer bg-transparent border-none ${
+                  item.type === "page" && currentView === "success"
+                    ? "text-white font-bold underline underline-offset-4"
+                    : ""
+                }`}
               >
-                {link.label}
-              </a>
+                {item.label}
+              </button>
             ))}
           </nav>
 
           <div className="hidden items-center gap-3 lg:flex">
             <LangSwitch tone="dark" />
-            <a href="#book" className="rounded-full bg-royal px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-royal-600 inline-flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                onNavigate?.("home");
+                setTimeout(() => {
+                  document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+                }, 100);
+              }}
+              className="rounded-full bg-royal px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-royal-600 inline-flex items-center gap-1.5 cursor-pointer"
+            >
               <CalendarPlus className="h-3.5 w-3.5" aria-hidden="true" />
               {t.nav.book}
-            </a>
+            </button>
           </div>
 
           <div className="flex items-center gap-2.5 lg:hidden">
@@ -220,7 +258,7 @@ export function Header() {
             className="fixed inset-0 z-[80] flex flex-col overflow-hidden bg-[#070B19] text-white lg:hidden"
           >
             <div className="relative flex items-center justify-between px-5 py-5 sm:px-8 border-b border-white/10">
-              <BrandLink tone="dark" onClick={() => setOpen(false)} />
+              <BrandLink tone="dark" onClick={() => { onNavigate?.("home"); setOpen(false); }} />
               <button
                 ref={closeRef}
                 type="button"
@@ -234,30 +272,36 @@ export function Header() {
 
             <nav aria-label="Mobile" className="relative flex-1 overflow-y-auto px-5 pt-6 sm:px-8">
               <ul className="flex flex-col gap-4">
-                {links.map((link, index) => (
-                  <li key={link.id} className="border-b border-white/10 pb-3">
-                    <a
-                      href={`#${link.id}`}
-                      onClick={() => setOpen(false)}
-                      className="flex items-center justify-between text-xl font-display text-white/90 hover:text-white"
+                {navItems.map((item) => (
+                  <li key={item.id} className="border-b border-white/10 pb-3">
+                    <button
+                      type="button"
+                      onClick={() => handleItemClick(item)}
+                      className="w-full flex items-center justify-between text-xl font-display text-white/90 hover:text-white bg-transparent border-none text-left cursor-pointer"
                     >
-                      <span>{link.label}</span>
+                      <span>{item.label}</span>
                       <ArrowUpRight className="h-4 w-4 text-white/40" />
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>
             </nav>
 
             <div className="p-6 border-t border-white/10">
-              <a
-                href="#book"
-                onClick={() => setOpen(false)}
-                className="w-full rounded-full bg-royal py-3 text-sm font-semibold text-white flex items-center justify-center gap-2 shadow"
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onNavigate?.("home");
+                  setTimeout(() => {
+                    document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+                  }, 100);
+                }}
+                className="w-full rounded-full bg-royal py-3 text-sm font-semibold text-white flex items-center justify-center gap-2 shadow cursor-pointer"
               >
                 <CalendarPlus className="h-4 w-4" />
                 {t.nav.book}
-              </a>
+              </button>
             </div>
           </motion.div>
         ) : null}
