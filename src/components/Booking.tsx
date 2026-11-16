@@ -16,7 +16,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useLang } from "../i18n";
-
 interface ReceiptData {
   receiptNo: string;
   date: string;
@@ -39,6 +38,7 @@ export function Booking() {
   // Active Tab State: 'general' or 'project'
   const [activeTab, setActiveTab] = useState<"general" | "project">("general");
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Receipt View State
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
@@ -76,8 +76,9 @@ export function Booking() {
     window.print();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     // Generate Unique Receipt ID
     const randomNum = Math.floor(10000 + Math.random() * 90000);
@@ -86,6 +87,43 @@ export function Booking() {
 
     const isProjectBkash =
       activeTab === "project" && formData.paymentMethod === "bkash";
+
+    const payloadData = {
+      receiptNo,
+      date: today,
+      type: activeTab,
+      patientName: formData.patientName,
+      age: formData.age,
+      guardianName: activeTab === "project" ? formData.guardianName : "",
+      address: formData.address,
+      mobile: formData.mobile,
+      chamber: activeTab === "general" ? formData.chamber : "Normal Delivery Project",
+      preferredDate: activeTab === "general" ? formData.preferredDate : "",
+      paymentMethod: activeTab === "general" ? "none" : formData.paymentMethod,
+      trxId: formData.trxId.toUpperCase(),
+      advancePaid: isProjectBkash ? PROJECT_ADVANCE_AMOUNT : 0,
+    };
+
+    try {
+      // ব্যাকএন্ড API-এ ডেটা পাঠানো হচ্ছে
+      const apiResponse = await fetch('http://localhost:5000/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payloadData),
+      });
+
+      const apiResult = await apiResponse.json();
+
+      if (!apiResult.success) {
+        console.error('Database save warning:', apiResult.error);
+      }
+    } catch (err) {
+      console.error('Backend connection error:', err);
+    } finally {
+      setLoading(false);
+    }
 
     const generatedReceipt: ReceiptData = {
       receiptNo,
@@ -110,7 +148,6 @@ export function Booking() {
     let message = "";
 
     if (activeTab === "general") {
-      // সাধারণ চেম্বার সিরিয়াল (কোনো অ্যাডভান্স নেই)
       message =
         lang === "bn"
           ? `*সাধারণ চেম্বার সিরিয়াল অনুরোধ*%0A%0A` +
@@ -132,7 +169,6 @@ export function Booking() {
             `📅 *Preferred Date:* ${formData.preferredDate}%0A` +
             `💳 *Fee:* Payable at Chamber (No Advance Required)`;
     } else {
-      // নরমাল ডেলিভারি প্রজেক্ট (২,০০০ টাকা ফিক্সড অ্যাডভান্স)
       const paymentInfoBn =
         formData.paymentMethod === "bkash"
           ? `💳 *পেমেন্ট মাধ্যম:* বিকাশ (bKash Personal)%0A💰 *অ্যাডভান্স পরিশোধিত:* ২,০০০ টাকা (ফিক্সড)%0A🧾 *Transaction ID:* ${formData.trxId.toUpperCase()}%0A🔖 *Receipt No:* ${receiptNo}`
@@ -190,7 +226,6 @@ export function Booking() {
       `}</style>
 
       <div className="shell max-w-4xl mx-auto">
-        {/* ================= RECEIPT VIEW (AFTER SUBMISSION) ================= */}
         {receipt ? (
           <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4 no-print">
@@ -253,7 +288,6 @@ export function Booking() {
               </div>
 
               <div className="p-6 sm:p-8 space-y-6">
-                {/* Status Banner */}
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
@@ -285,7 +319,6 @@ export function Booking() {
                   )}
                 </div>
 
-                {/* Patient Details Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm border-y border-line py-5">
                   <div>
                     <span className="text-xs text-muted block">
@@ -356,7 +389,6 @@ export function Booking() {
                   )}
                 </div>
 
-                {/* Payment / Fee Summary Box */}
                 <div className="bg-slate-50 p-5 rounded-2xl border border-line space-y-2.5 text-sm">
                   {receipt.type === "general" ? (
                     <>
@@ -427,7 +459,6 @@ export function Booking() {
                   )}
                 </div>
 
-                {/* Footer Signature & Contact */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 text-xs text-muted">
                   <div>
                     <p className="font-semibold text-ink">
@@ -448,9 +479,7 @@ export function Booking() {
             </div>
           </div>
         ) : (
-          /* ================= BOOKING FORM VIEW ================= */
           <>
-            {/* Tab Selection Navigation */}
             <div className="flex justify-center mb-8">
               <div className="inline-flex rounded-2xl bg-slate-100 p-1.5 border border-line shadow-inner">
                 <button
@@ -485,7 +514,6 @@ export function Booking() {
             </div>
 
             <div className="bg-white rounded-[28px] border border-royal/15 shadow-xl overflow-hidden">
-              {/* Header depending on active tab */}
               <div
                 className={`p-6 sm:p-8 text-center relative overflow-hidden transition-colors ${
                   activeTab === "project"
@@ -516,9 +544,7 @@ export function Booking() {
                 </p>
               </div>
 
-              {/* Form Content */}
               <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-6">
-                {/* Common Row: Patient Name & Age */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <div className="sm:col-span-2 space-y-2">
                     <label className="block text-xs font-semibold uppercase text-ink/70">
@@ -558,7 +584,6 @@ export function Booking() {
                   </div>
                 </div>
 
-                {/* If Project Mode -> Guardian Name */}
                 {activeTab === "project" && (
                   <div className="space-y-2">
                     <label className="block text-xs font-semibold uppercase text-ink/70">
@@ -585,7 +610,6 @@ export function Booking() {
                   </div>
                 )}
 
-                {/* Address & Mobile */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="block text-xs font-semibold uppercase text-ink/70">
@@ -626,7 +650,6 @@ export function Booking() {
                   </div>
                 </div>
 
-                {/* If General Appointment Mode -> Preferred Chamber & Date (NO ADVANCE) */}
                 {activeTab === "general" && (
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -683,7 +706,6 @@ export function Booking() {
                   </>
                 )}
 
-                {/* If Project Mode -> 2,000 BDT Fixed Advance Payment Options */}
                 {activeTab === "project" && (
                   <>
                     <div className="space-y-2">
@@ -707,115 +729,80 @@ export function Booking() {
                           </option>
                           <option value="cash">
                             {lang === "bn"
-                              ? "চেম্বারে সরাসরি ক্যাশ প্রদান (২,০০০ টাকা অগ্রিম প্রযোজ্য)"
-                              : "Pay Cash at Chamber (2,000 BDT Advance applicable)"}
+                              ? "চেম্বারে সরাসরি ক্যাশ প্রদান"
+                              : "Cash at Chamber"}
                           </option>
                         </select>
                       </div>
                     </div>
 
-                    {/* bKash Instruction & TrxID Field when 'bkash' is selected */}
                     {formData.paymentMethod === "bkash" && (
-                      <div className="p-5 bg-pink-50/80 border border-pink-200 rounded-2xl space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div>
-                            <p className="text-xs font-bold uppercase tracking-wider text-pink-700">
-                              {lang === "bn"
-                                ? "বিকাশ পার্সোনাল নম্বর (Send Money)"
-                                : "bKash Personal Number (Send Money)"}
-                            </p>
-                            <div className="flex items-center gap-3 mt-1">
-                              <p className="text-lg font-bold text-ink">
-                                01759945057
-                              </p>
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-pink-600 text-white">
-                                {lang === "bn"
-                                  ? "অ্যাডভান্স: ২,০০০ টাকা"
-                                  : "Advance: 2,000 BDT"}
-                              </span>
-                            </div>
-                          </div>
+                      <div className="p-5 bg-pink-50 border border-pink-200 rounded-2xl space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-pink-900 uppercase">
+                            {lang === "bn" ? "বিকাশ পার্সোনাল নম্বর" : "bKash Personal Number"}
+                          </span>
                           <button
                             type="button"
                             onClick={handleCopyNumber}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-pink-600 text-white text-xs font-semibold hover:bg-pink-700 transition self-start sm:self-auto"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-pink-600 text-white rounded-lg text-xs font-bold hover:bg-pink-700 transition"
                           >
-                            {copied ? (
-                              <Check className="h-3.5 w-3.5" />
-                            ) : (
-                              <Copy className="h-3.5 w-3.5" />
-                            )}
-                            {copied
-                              ? lang === "bn"
-                                ? "কপি হয়েছে"
-                                : "Copied"
-                              : lang === "bn"
-                              ? "নম্বর কপি করুন"
-                              : "Copy Number"}
+                            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                            {copied ? (lang === "bn" ? "কপি হয়েছে!" : "Copied!") : (lang === "bn" ? "নম্বর কপি করুন" : "Copy Number")}
                           </button>
                         </div>
-
-                        <p className="text-xs text-ink/75 leading-relaxed">
+                        <p className="text-lg font-mono font-bold text-pink-700">
+                          01759945057 <span className="text-xs font-normal text-muted">(Send Money / Personal)</span>
+                        </p>
+                        <p className="text-xs text-pink-800">
                           {lang === "bn"
-                            ? 'উপরের বিকাশ পার্সোনাল নম্বরে ফিক্সড ২,০০০ টাকা "Send Money" করার পর নিচের ঘরে আপনার বিকাশ Transaction ID (TrxID) লিখে ফর্মটি জমা দিন। জমা দেওয়ার সাথে সাথেই আপনি চেম্বারে আসার জন্য ডাউনলোডযোগ্য অ্যাডভান্স রিসিপ্ট পেয়ে যাবেন।'
-                            : 'Send Money 2,000 BDT to the bKash number above, enter the Transaction ID (TrxID) below, and submit to instantly receive your downloadable advance receipt for the chamber.'}
+                            ? "উপরের নম্বরে ২,০০০ টাকা সেন্ড মানি করে নিচের বক্সে আপনার বিকাশ ট্রানজেকশন আইডি (TrxID) লিখুন।"
+                            : "Send Money 2,000 BDT to the above number and enter your bKash Transaction ID (TrxID) below."}
                         </p>
 
-                        <div className="space-y-1.5">
-                          <label className="block text-xs font-semibold uppercase text-pink-900">
-                            {lang === "bn"
-                              ? "বিকাশ Transaction ID (TrxID) *"
-                              : "bKash Transaction ID (TrxID) *"}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-semibold uppercase text-ink/70">
+                            {lang === "bn" ? "বিকাশ ট্রানজেকশন আইডি (TrxID) *" : "bKash TrxID *"}
                           </label>
                           <div className="relative">
-                            <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-pink-600" />
+                            <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
                             <input
                               type="text"
                               name="trxId"
-                              required={
-                                activeTab === "project" &&
-                                formData.paymentMethod === "bkash"
-                              }
-                              placeholder={
-                                lang === "bn"
-                                  ? "যেমন: BGH78K9L2P"
-                                  : "e.g., BGH78K9L2P"
-                              }
+                              required={formData.paymentMethod === "bkash"}
+                              placeholder="যেমন: 9J74H2K9L1"
                               value={formData.trxId}
                               onChange={handleChange}
-                              className="w-full pl-10 pr-4 py-2.5 border border-pink-300 bg-white rounded-xl text-sm focus:outline-none focus:border-pink-600 uppercase"
+                              className="w-full pl-10 pr-4 py-3 border border-pink-300 bg-white rounded-xl text-sm font-mono uppercase focus:outline-none focus:border-pink-600"
                             />
                           </div>
                         </div>
                       </div>
                     )}
-
-                    <div className="p-4 bg-royal/[0.05] border border-royal/15 rounded-xl text-xs text-muted leading-relaxed">
-                      💡{" "}
-                      {lang === "bn"
-                        ? "রেজিস্ট্রেশন ফি: ডেলিভারির খরচ থেকে কর্তন যোগ্য ২,০০০ টাকা অগ্রিম ফি প্রযোজ্য। বাকি টাকা চেম্বারে পরিশোধ করতে হবে।"
-                        : "Registration Fee: Fixed 2,000 BDT advance fee applicable, deductible from delivery cost. Remaining balance payable at chamber."}
-                    </div>
                   </>
                 )}
 
-                {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full btn btn-primary py-3.5 justify-center text-base shadow-lg hover:shadow-xl transition-all"
+                  disabled={loading}
+                  className={`w-full py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-2 shadow-lg transition-all ${
+                    activeTab === "project"
+                      ? "bg-royal hover:bg-royal/90 shadow-royal/25"
+                      : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25"
+                  }`}
                 >
-                  <Send className="h-5 w-5 mr-2" />
-                  {activeTab === "general"
+                  <Send className="h-4 w-4" />
+                  {loading
                     ? lang === "bn"
-                      ? "সিরিয়াল কনফার্ম করুন ও রিসিপ্ট নিন"
-                      : "Confirm Serial & Get Receipt"
-                    : formData.paymentMethod === "bkash"
+                      ? "প্রক্রিয়াধীন রয়েছে..."
+                      : "Processing..."
+                    : activeTab === "project"
                     ? lang === "bn"
-                      ? "২,০০০ টাকা বিকাশ তথ্যসহ কনফার্ম করুন ও রিসিপ্ট নিন"
-                      : "Confirm 2,000 BDT bKash Payment & Get Receipt"
+                      ? "নরমাল ডেলিভারি প্রজেক্ট বুকিং নিশ্চিত করুন"
+                      : "Confirm Normal Delivery Project Booking"
                     : lang === "bn"
-                    ? "রেজিস্ট্রেশন জমা দিন ও স্লিপ নিন"
-                    : "Submit Registration & Get Slip"}
+                    ? "চেম্বার সিরিয়াল বুকিং নিশ্চিত করুন"
+                    : "Confirm Chamber Appointment"}
                 </button>
               </form>
             </div>

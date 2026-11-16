@@ -35,7 +35,7 @@ export const en = {
     eyebrow: "Consultant Gynaecologist · Jashore",
     titleA: "Women’s health,",
     titleB: "held with grace",
-    titleC: "and precision.",
+    titleC: "",
     description:
       "Dr. Nurjahan (Mukti) is a consultant gynecologist and laparoscopic surgeon in Jashore, offering evidence-based, deeply personal care through pregnancy, fertility, surgery and menopause.",
     badge: "MBBS · BCS (Health) · FCPS (Gynae & Obs)",
