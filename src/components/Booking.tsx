@@ -16,6 +16,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useLang } from "../i18n";
+
 interface ReceiptData {
   receiptNo: string;
   date: string;
@@ -106,7 +107,12 @@ export function Booking() {
 
     try {
       // ব্যাকএন্ড API-এ ডেটা পাঠানো হচ্ছে
-      const apiResponse = await fetch('http://localhost:5000/api/appointments', {
+      // প্রডাকশনের জন্য এখানে লোকালহোস্টের পরিবর্তে আপনার লাইভ ব্যাকএন্ড URL ব্যবহার করতে হবে
+      const apiUrl = import.meta.env.PROD 
+        ? 'https://your-backend-url.onrender.com/api/appointments' 
+        : 'http://localhost:5000/api/appointments';
+
+      const apiResponse = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
